@@ -61,10 +61,10 @@ class PipeTransport {
         console.error("buffer[" + i + "]: " + buffer[i])
     }
     console.error("from driver", buffer.length, buffer.toString('utf-8'))
-    if (buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
-      // It's a BOM
-      buffer = buffer.slice(3);
-    }
+    // if (buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
+    //   // It's a BOM
+    //   buffer = buffer.slice(3);
+    // }
 
     this._data = Buffer.concat([this._data, buffer]);
     while (true) {
