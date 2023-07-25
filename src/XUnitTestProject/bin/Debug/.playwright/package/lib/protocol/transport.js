@@ -56,21 +56,30 @@ class PipeTransport {
     this._closeableStream.close();
   }
   _dispatch(buffer) {
+
+    console.error("in driver", buffer.length, buffer.toString('utf-8'))
     this._data = Buffer.concat([this._data, buffer]);
     while (true) {
-      if (!this._bytesLeft && this._data.length < 4) {
+        console.error("driver transport1")
+        if (!this._bytesLeft && this._data.length < 4) {
+        console.error("driver transport2")
         // Need more data.
         break;
       }
-      if (!this._bytesLeft) {
+        console.error("driver transport3")
+        if (!this._bytesLeft) {
+        console.error("driver transport4")
         this._bytesLeft = this._endian === 'be' ? this._data.readUInt32BE(0) : this._data.readUInt32LE(0);
+        console.error("driver transport4.1", this._bytesLeft)
         this._data = this._data.slice(4);
       }
       if (!this._bytesLeft || this._data.length < this._bytesLeft) {
+        console.error("driver transport5")
         // Need more data.
         break;
       }
-      const message = this._data.slice(0, this._bytesLeft);
+        console.error("driver transport6")
+        const message = this._data.slice(0, this._bytesLeft);
       this._data = this._data.slice(this._bytesLeft);
       this._bytesLeft = 0;
       this._waitForNextTask(() => {

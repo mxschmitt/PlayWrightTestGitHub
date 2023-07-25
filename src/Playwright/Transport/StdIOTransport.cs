@@ -25,6 +25,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Playwright.Helpers;
@@ -36,6 +37,7 @@ internal class StdIOTransport : IDisposable
     private const int DefaultBufferSize = 1024;  // Byte buffer size
     private readonly Process _process;
     private readonly CancellationTokenSource _readerCancellationSource = new();
+    private readonly Task _getResponseTask;
     private readonly List<byte> _data = new();
     private int? _currentMessageSize;
 
@@ -54,7 +56,7 @@ internal class StdIOTransport : IDisposable
         };
         _process.BeginErrorReadLine();
 
-        ScheduleTransportTask(GetResponseAsync, _readerCancellationSource.Token);
+        _getResponseTask = ScheduleTransportTaskAsync(GetResponseAsync, _readerCancellationSource.Token);
     }
 
     ~StdIOTransport() => Dispose(false);
@@ -78,7 +80,7 @@ internal class StdIOTransport : IDisposable
         if (!IsClosed)
         {
             IsClosed = true;
-            TransportClosed?.Invoke(this, closeReason); //// TJW Added null check
+            TransportClosed?.Invoke(this, closeReason);
             _readerCancellationSource?.Cancel();
             _process.StandardInput.Close();
             _process.WaitForExit();
@@ -87,26 +89,16 @@ internal class StdIOTransport : IDisposable
 
     public async Task SendAsync(byte[] message)
     {
-        Console.WriteLine("StdIOTransport>SendAsync1");
-        Console.WriteLine(Encoding.UTF8.GetString(message));
         try
         {
             if (!_readerCancellationSource.IsCancellationRequested)
             {
-                int len = message.Length;
-                byte[] ll = new byte[4];
-                ll[0] = (byte)(len & 0xFF);
-                ll[1] = (byte)((len >> 8) & 0xFF);
-                ll[2] = (byte)((len >> 16) & 0xFF);
-                ll[3] = (byte)((len >> 24) & 0xFF);
-
-                Console.WriteLine("StdIOTransport>SendAsync2");
-                await _process.StandardInput.BaseStream.WriteAsync(ll, 0, 4, _readerCancellationSource.Token).ConfigureAwait(false);
+                await _process.StandardInput.BaseStream.WriteAsync(BitConverter.GetBytes(message.Length), 0, 4).ConfigureAwait(false);
+                Console.WriteLine("StdIOTransport>SendAsync2 Length: " + message.Length);
+                await _process.StandardInput.BaseStream.WriteAsync(message, 0, message.Length).ConfigureAwait(false);
                 Console.WriteLine("StdIOTransport>SendAsync3");
-                await _process.StandardInput.BaseStream.WriteAsync(message, 0, len, _readerCancellationSource.Token).ConfigureAwait(false);
+                await _process.StandardInput.BaseStream.FlushAsync().ConfigureAwait(false);
                 Console.WriteLine("StdIOTransport>SendAsync4");
-                await _process.StandardInput.BaseStream.FlushAsync(_readerCancellationSource.Token).ConfigureAwait(false);
-                Console.WriteLine("StdIOTransport>SendAsync5");
             }
         }
         catch (Exception ex)
@@ -135,7 +127,7 @@ internal class StdIOTransport : IDisposable
         };
     }
 
-    private static void ScheduleTransportTask(Func<CancellationToken, Task> func, CancellationToken cancellationToken)
+    private static Task ScheduleTransportTaskAsync(Func<CancellationToken, Task> func, CancellationToken cancellationToken)
         => Task.Factory.StartNew(() => func(cancellationToken), cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
 
     private void Close(Exception ex)
@@ -153,6 +145,7 @@ internal class StdIOTransport : IDisposable
 
         _readerCancellationSource?.Dispose();
         _process?.Dispose();
+        _getResponseTask?.Dispose();
     }
 
     private async Task GetResponseAsync(CancellationToken token)
@@ -196,8 +189,7 @@ internal class StdIOTransport : IDisposable
                     {
                         break;
                     }
-
-                    _currentMessageSize = _data[offset + 0] + (_data[offset + 1] << 8) + (_data[offset + 2] << 16) + (_data[offset + 3] << 24);
+                    _currentMessageSize = BitConverter.ToInt32(_data.GetRange(offset, 4).ToArray(), 0);
                     offset += 4;
                 }
 
@@ -206,12 +198,10 @@ internal class StdIOTransport : IDisposable
                     break;
                 }
 
-                byte[] result = new byte[_currentMessageSize.Value];
-                _data.CopyTo(offset, result, 0, result.Length);
-                offset += result.Length;
+                var result = _data.GetRange(offset, _currentMessageSize.Value).ToArray();
+                offset += _currentMessageSize.Value;
                 _currentMessageSize = null;
                 Console.WriteLine("StdIOTransport>ProcessStream1");
-                Console.WriteLine(result);
                 Console.WriteLine(Encoding.UTF8.GetString(result));
                 MessageReceived?.Invoke(this, result);
             }

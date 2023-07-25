@@ -43,6 +43,7 @@ function runDriver() {
   new _server.RootDispatcher(dispatcherConnection, async (rootScope, {
     sdkLanguage
   }) => {
+    console.error('Hello from the driver!')
     const playwright = (0, _server.createPlaywright)(sdkLanguage);
     return new _server.PlaywrightDispatcher(rootScope, playwright);
   });
