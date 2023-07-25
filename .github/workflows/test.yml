@@ -22,11 +22,9 @@ jobs:
 
 #    - name: Build project
 #      run: dotnet build src/XUnitTestProject/XUnitTestProject.csproj
-    - name: Log env vars
-      shell: bash
-      run: env
 
     - name: Run Unit Tests
       run: |
+        chcp
         $env:DEBUG="pw:api pw:channel:command pw:channel:response pw:channel:event pw:dotnet"
         vstest.console.exe .\src\XUnitTestProject\bin\Debug\xunittestproject.dll #/logger:"console;verbosity=detailed"
