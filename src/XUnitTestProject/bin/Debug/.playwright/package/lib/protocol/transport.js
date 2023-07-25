@@ -56,8 +56,11 @@ class PipeTransport {
     this._closeableStream.close();
   }
   _dispatch(buffer) {
-
-    console.error("in driver", buffer.length, buffer.toString('utf-8'))
+    // print every byte in buffer
+    for (var i = 0; i < buffer.length; i++) {
+        console.error("buffer[" + i + "]: " + buffer[i])
+    }
+    console.error("from driver", buffer.length, buffer.toString('utf-8'))
     this._data = Buffer.concat([this._data, buffer]);
     while (true) {
         console.error("driver transport1")
