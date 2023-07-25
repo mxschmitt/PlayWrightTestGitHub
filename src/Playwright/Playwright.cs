@@ -54,9 +54,9 @@ public static class Playwright
         transport.TransportClosed += (_, reason) => connection.DoClose(reason);
         connection.OnMessage = (message, keepNulls) => transport.SendAsync(JsonSerializer.SerializeToUtf8Bytes(message, keepNulls ? connection.DefaultJsonSerializerOptionsKeepNulls : connection.DefaultJsonSerializerOptions));
         connection.Close += (_, reason) => transport.Close(reason);
-        Console.WriteLine("Playwright>CreateAsync1")
+        Console.WriteLine("Playwright>CreateAsync1");
         var playwright = await connection.InitializePlaywrightAsync().ConfigureAwait(false);
-        Console.WriteLine("Playwright>CreateAsync2")
+        Console.WriteLine("Playwright>CreateAsync2");
         return playwright;
     }
 }
