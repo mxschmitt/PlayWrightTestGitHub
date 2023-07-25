@@ -14,8 +14,10 @@ jobs:
     - name: Setup VSTest Paths
       uses: darenm/Setup-VSTest@v1.2
 
+    - name: Build project
+      run: dotnet build src/XUnitTestProject/XUnitTestProject.csproj
+
     - name: Run Unit Tests
       run: |
         $env:DEBUG="pw:api pw:channel:command pw:channel:response pw:channel:event pw:dotnet"
-        $env:PWDEBUG="console"      
         vstest.console.exe .\src\XUnitTestProject\bin\Debug\xunittestproject.dll #/logger:"console;verbosity=detailed"
