@@ -14,6 +14,12 @@ jobs:
     - name: Setup VSTest Paths
       uses: darenm/Setup-VSTest@v1.2
 
+    - name: Install Playwright
+      run: |
+        $playwrightInstaller = Get-Childitem -Path .\src\XUnitTestProject\ -Recurse playwright.ps1
+        & $playwrightInstaller install chromium
+
+
 #    - name: Build project
 #      run: dotnet build src/XUnitTestProject/XUnitTestProject.csproj
 
