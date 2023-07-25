@@ -87,6 +87,8 @@ internal class StdIOTransport : IDisposable
 
     public async Task SendAsync(byte[] message)
     {
+        Console.WriteLine("StdIOTransport>SendAsync");
+        Console.WriteLine(message);
         try
         {
             if (!_readerCancellationSource.IsCancellationRequested)
@@ -204,6 +206,8 @@ internal class StdIOTransport : IDisposable
                 _data.CopyTo(offset, result, 0, result.Length);
                 offset += result.Length;
                 _currentMessageSize = null;
+                Console.WriteLine("StdIOTransport>ProcessStream1");
+                Console.WriteLine(result);
                 MessageReceived?.Invoke(this, result);
             }
         }

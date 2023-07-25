@@ -441,25 +441,17 @@ internal class Connection : IDisposable
     [Conditional("DEBUG")]
     internal void TraceMessage(string logLevel, object message)
     {
-        string actualLogLevel = Environment.GetEnvironmentVariable("DEBUG");
-        if (!string.IsNullOrEmpty(actualLogLevel))
+        if (message is not string)
         {
-            if (!actualLogLevel.Contains(logLevel))
-            {
-                return;
-            }
-            if (message is not string)
-            {
-                message = JsonSerializer.Serialize(message, DefaultJsonSerializerOptions);
-            }
-            if (((string)message).Contains("deviceDescriptors"))
-            {
-                return;
-            }
-            string line = $"{logLevel}: {message}";
-            Trace.WriteLine(line);
-            Console.Error.WriteLine(line);
+            message = JsonSerializer.Serialize(message, DefaultJsonSerializerOptions);
         }
+        if (((string)message).Contains("deviceDescriptors"))
+        {
+            return;
+        }
+        string line = $"{logLevel}: {message}";
+        Trace.WriteLine(line);
+        Console.Error.WriteLine(line);
     }
 
     internal async Task<T> WrapApiCallAsync<T>(Func<Task<T>> action, bool isInternal = false)
