@@ -96,6 +96,7 @@ internal class StdIOTransport : IDisposable
                 Console.WriteLine("StdIOTransport>SendAsync1 BitConverter.IsLittleEndian: " + BitConverter.IsLittleEndian);
                 await _process.StandardInput.BaseStream.WriteAsync(BitConverter.GetBytes(message.Length), 0, 4).ConfigureAwait(false);
                 Console.WriteLine("StdIOTransport>SendAsync2 Length: " + message.Length);
+                await _process.StandardInput.BaseStream.FlushAsync().ConfigureAwait(false);
                 await _process.StandardInput.BaseStream.WriteAsync(message, 0, message.Length).ConfigureAwait(false);
                 Console.WriteLine("StdIOTransport>SendAsync3");
                 await _process.StandardInput.BaseStream.FlushAsync().ConfigureAwait(false);
