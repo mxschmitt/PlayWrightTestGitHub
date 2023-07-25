@@ -25,6 +25,6 @@ jobs:
 
     - name: Run Unit Tests
       run: |
-        chcp
+        chcp 437
         $env:DEBUG="pw:api pw:channel:command pw:channel:response pw:channel:event pw:dotnet"
         vstest.console.exe .\src\XUnitTestProject\bin\Debug\xunittestproject.dll #/logger:"console;verbosity=detailed"
