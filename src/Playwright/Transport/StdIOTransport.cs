@@ -87,7 +87,7 @@ internal class StdIOTransport : IDisposable
 
     public async Task SendAsync(byte[] message)
     {
-        Console.WriteLine("StdIOTransport>SendAsync");
+        Console.WriteLine("StdIOTransport>SendAsync1");
         Console.WriteLine(Encoding.UTF8.GetString(message));
         try
         {
@@ -100,9 +100,13 @@ internal class StdIOTransport : IDisposable
                 ll[2] = (byte)((len >> 16) & 0xFF);
                 ll[3] = (byte)((len >> 24) & 0xFF);
 
+                Console.WriteLine("StdIOTransport>SendAsync2");
                 await _process.StandardInput.BaseStream.WriteAsync(ll, 0, 4, _readerCancellationSource.Token).ConfigureAwait(false);
+                Console.WriteLine("StdIOTransport>SendAsync3");
                 await _process.StandardInput.BaseStream.WriteAsync(message, 0, len, _readerCancellationSource.Token).ConfigureAwait(false);
+                Console.WriteLine("StdIOTransport>SendAsync4");
                 await _process.StandardInput.BaseStream.FlushAsync(_readerCancellationSource.Token).ConfigureAwait(false);
+                Console.WriteLine("StdIOTransport>SendAsync5");
             }
         }
         catch (Exception ex)
