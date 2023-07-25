@@ -117,6 +117,8 @@ internal class StdIOTransport : IDisposable
             RedirectStandardOutput = true,
             RedirectStandardInput = true,
             RedirectStandardError = true,
+            StandardOutputEncoding = new UTF8Encoding(false),
+            StandardErrorEncoding = new UTF8Encoding(false),
             CreateNoWindow = true,
         };
         foreach (var pair in Driver.GetEnvironmentVariables())
