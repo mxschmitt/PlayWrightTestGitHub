@@ -69,8 +69,9 @@ class PipeTransport {
         console.error("driver transport3")
         if (!this._bytesLeft) {
         console.error("driver transport4")
+        console.error(this._data[0], this._data[1], this._data[2], this._data[3])
         this._bytesLeft = this._endian === 'be' ? this._data.readUInt32BE(0) : this._data.readUInt32LE(0);
-        console.error("driver transport4.1", this._bytesLeft)
+        console.error("driver transport4.1", this._endian, this._bytesLeft)
         this._data = this._data.slice(4);
       }
       if (!this._bytesLeft || this._data.length < this._bytesLeft) {
